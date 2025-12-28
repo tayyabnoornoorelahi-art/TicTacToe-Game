@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #1a2a6c;
+            margin-bottom: 10px;
+            font-size: 2.8rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.2rem;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 12px;
+            margin: 0 auto 30px;
+            max-width: 400px;
+        }
+
+        .cell {
+            aspect-ratio: 1;
+            background: white;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+
+        .cell:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+            border-color: #1a2a6c;
+        }
+
+        .cell.x {
+            color: #b21f1f;
+        }
+
+        .cell.o {
+            color: #1a2a6c;
+        }
+
+        .cell.winning {
+            background: linear-gradient(45deg, #fdbb2d, #ffcc00);
+            color: #1a2a6c;
+            box-shadow: 0 0 25px rgba(253, 187, 45, 0.7);
+        }
+
+        .game-info {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #333;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .player-turn {
+            color: #1a2a6c;
+            font-size: 1.6rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .primary-btn {
+            background: linear-gradient(45deg, #1a2a6c, #2a3a8c);
+            color: white;
+            flex: 1;
+        }
+
+        .secondary-btn {
+            background: linear-gradient(45deg, #b21f1f, #c22f2f);
+            color: white;
+            flex: 1;
+        }
+
+        /* Popup Styles */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .popup {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            animation: slideUp 0.4s ease;
+            position: relative;
+        }
+
+        .popup h2 {
+            color: #1a2a6c;
+            margin-bottom: 25px;
+            font-size: 2rem;
+            text-align: center;
+        }
+
+        .popup-content {
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            border-color: #1a2a6c;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26, 42, 108, 0.1);
+        }
+
+        .option-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .option {
+            flex: 1;
+            text-align: center;
+            padding: 20px;
+            border-radius: 12px;
+            border: 3px solid #ddd;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+
+        .option.selected {
+            border-color: #1a2a6c;
+            background: rgba(26, 42, 108, 0.1);
+            transform: scale(1.05);
+        }
+
+        .sign-option {
+            font-size: 3.5rem;
+            font-weight: bold;
+        }
+
+        .sign-option.x {
+            color: #b21f1f;
+        }
+
+        .sign-option.o {
+            color: #1a2a6c;
+        }
+
+        .popup-btn {
+            width: 100%;
+            padding: 16px;
+            margin-top: 10px;
+            background: linear-gradient(45deg, #1a2a6c, #2a3a8c);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .popup-btn:hover {
+            background: linear-gradient(45deg, #2a3a8c, #3a4a9c);
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(26, 42, 108, 0.3);
+        }
+
+        .result-popup .popup {
+            text-align: center;
+            padding: 50px 40px;
+        }
+
+        .result-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+        }
+
+        .win-icon {
+            color: #4CAF50;
+        }
+
+        .lose-icon {
+            color: #b21f1f;
+        }
+
+        .tie-icon {
+            color: #fdbb2d;
+        }
+
+        .result-message {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: #1a2a6c;
+        }
+
+        .score-display {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            color: #555;
+        }
+
+        .score-value {
+            font-weight: 700;
+            color: #1a2a6c;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .game-container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .cell {
+                font-size: 3.5rem;
+            }
+            
+            .option-group {
+                flex-direction: column;
+            }
+            
+            .popup {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Tic-Tac-Toe</h1>
+        <p class="subtitle">Classic game with modern twist</p>
+        
+        <div class="game-info" id="game-status">
+            <div class="player-turn">X</div>
+            <div>'s Turn</div>
+        </div>
+        
+        <div class="game-board" id="game-board">
+            <!-- Cells will be generated by JavaScript -->
+        </div>
+        
+        <div class="controls">
+            <button class="primary-btn" id="new-game-btn">
+                <span>🎮</span> New Game
+            </button>
+            <button class="secondary-btn" id="restart-btn">
+                <span>🔄</span> Restart
+            </button>
+        </div>
+    </div>
+
+    <!-- Welcome Popup -->
+    <div class="popup-overlay" id="welcome-popup">
+        <div class="popup">
+            <h2>Welcome to Tic-Tac-Toe!</h2>
+            <div class="popup-content">
+                <p style="text-align: center; margin-bottom: 25px; font-size: 1.2rem; color: #555;">
+                    Get ready to play the classic game of X's and O's. First, let's set up your game.
+                </p>
+            </div>
+            <button class="popup-btn" id="start-setup-btn">Let's Get Started</button>
+        </div>
+    </div>
+
+    <!-- Player Name Popup -->
+    <div class="popup-overlay" id="name-popup">
+        <div class="popup">
+            <h2>Enter Your Name</h2>
+            <div class="popup-content">
+                <div class="input-group">
+                    <label for="player-name">Your Name</label>
+                    <input type="text" id="player-name" placeholder="Enter your name" value="Player">
+                </div>
+            </div>
+            <button class="popup-btn" id="name-next-btn">Next</button>
+        </div>
+    </div>
+
+    <!-- Game Mode Popup -->
+    <div class="popup-overlay" id="mode-popup">
+        <div class="popup">
+            <h2>Select Game Mode</h2>
+            <div class="popup-content">
+                <p style="text-align: center; margin-bottom: 20px; color: #555;">
+                    Choose how you want to play:
+                </p>
+                <div class="option-group">
+                    <div class="option" data-mode="bot">
+                        <div style="font-size: 3rem;">🤖</div>
+                        <div>VS Computer</div>
+                    </div>
+                    <div class="option selected" data-mode="multiplayer">
+                        <div style="font-size: 3rem;">👥</div>
+                        <div>Two Players</div>
+                    </div>
+                </div>
+            </div>
+            <button class="popup-btn" id="mode-next-btn">Next</button>
+        </div>
+    </div>
+
+    <!-- Sign Selection Popup -->
+    <div class="popup-overlay" id="sign-popup">
+        <div class="popup">
+            <h2>Choose Your Sign</h2>
+            <div class="popup-content">
+                <p style="text-align: center; margin-bottom: 20px; color: #555;">
+                    Select which symbol you want to play as:
+                </p>
+                <div class="option-group">
+                    <div class="option sign-option x selected" data-sign="X">
+                        X
+                    </div>
+                    <div class="option sign-option o" data-sign="O">
+                        O
+                    </div>
+                </div>
+            </div>
+            <button class="popup-btn" id="sign-next-btn">Start Game</button>
+        </div>
+    </div>
+
+    <!-- Result Popup -->
+    <div class="popup-overlay result-popup" id="result-popup">
+        <div class="popup">
+            <div class="result-icon" id="result-icon">🏆</div>
+            <div class="result-message" id="result-message">You Win!</div>
+            <div class="score-display">
+                <div>Player: <span class="score-value" id="player-score">0</span></div>
+                <div>Computer: <span class="score-value" id="computer-score">0</span></div>
+                <div>Ties: <span class="score-value" id="tie-score">0</span></div>
+            </div>
+            <button class="popup-btn" id="play-again-btn">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let gameState = {
+            playerName: 'Player',
+            gameMode: 'multiplayer', // 'multiplayer' or 'bot'
+            playerSign: 'X',
+            opponentSign: 'O',
+            currentPlayer: 'X',
+            board: ['', '', '', '', '', '', '', '', ''],
+            gameActive: false,
+            scores: {
+                player: 0,
+                opponent: 0,
+                ties: 0
+            }
+        };
+
+        // DOM Elements
+        const gameBoardElement = document.getElementById('game-board');
+        const gameStatusElement = document.getElementById('game-status');
+        const playerScoreElement = document.getElementById('player-score');
+        const computerScoreElement = document.getElementById('computer-score');
+        const tieScoreElement = document.getElementById('tie-score');
+        
+        // Popup elements
+        const welcomePopup = document.getElementById('welcome-popup');
+        const namePopup = document.getElementById('name-popup');
+        const modePopup = document.getElementById('mode-popup');
+        const signPopup = document.getElementById('sign-popup');
+        const resultPopup = document.getElementById('result-popup');
+        
+        // Button elements
+        const startSetupBtn = document.getElementById('start-setup-btn');
+        const nameNextBtn = document.getElementById('name-next-btn');
+        const modeNextBtn = document.getElementById('mode-next-btn');
+        const signNextBtn = document.getElementById('sign-next-btn');
+        const playAgainBtn = document.getElementById('play-again-btn');
+        const newGameBtn = document.getElementById('new-game-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        
+        // Winning combinations
+        const winPatterns = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+            [0, 4, 8], [2, 4, 6]             // diagonals
+        ];
+
+        // Initialize the game
+        function initGame() {
+            createGameBoard();
+            setupEventListeners();
+            showPopup(welcomePopup);
+        }
+
+        // Create the game board
+        function createGameBoard() {
+            gameBoardElement.innerHTML = '';
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.dataset.index = i;
+                cell.addEventListener('click', () => handleCellClick(i));
+                gameBoardElement.appendChild(cell);
+            }
+        }
+
+        // Set up all event listeners
+        function setupEventListeners() {
+            // Popup buttons
+            startSetupBtn.addEventListener('click', () => {
+                hidePopup(welcomePopup);
+                showPopup(namePopup);
+            });
+
+            nameNextBtn.addEventListener('click', () => {
+                const playerNameInput = document.getElementById('player-name');
+                gameState.playerName = playerNameInput.value || 'Player';
+                hidePopup(namePopup);
+                showPopup(modePopup);
+            });
+
+            modeNextBtn.addEventListener('click', () => {
+                hidePopup(modePopup);
+                showPopup(signPopup);
+            });
+
+            signNextBtn.addEventListener('click', startGame);
+
+            playAgainBtn.addEventListener('click', () => {
+                hidePopup(resultPopup);
+                resetBoard();
+            });
+
+            // Game control buttons
+            newGameBtn.addEventListener('click', () => {
+                gameState.scores = { player: 0, opponent: 0, ties: 0 };
+                updateScoreDisplay();
+                showPopup(namePopup);
+            });
+
+            restartBtn.addEventListener('click', resetBoard);
+
+            // Mode selection
+            document.querySelectorAll('#mode-popup .option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('#mode-popup .option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                    gameState.gameMode = this.dataset.mode;
+                });
+            });
+
+            // Sign selection
+            document.querySelectorAll('#sign-popup .option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('#sign-popup .option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                    gameState.playerSign = this.dataset.sign;
+                    gameState.opponentSign = gameState.playerSign === 'X' ? 'O' : 'X';
+                });
+            });
+        }
+
+        // Show a popup
+        function showPopup(popup) {
+            popup.style.display = 'flex';
+        }
+
+        // Hide a popup
+        function hidePopup(popup) {
+            popup.style.display = 'none';
+        }
+
+        // Start the game
+        function startGame() {
+            hidePopup(signPopup);
+            gameState.gameActive = true;
+            gameState.currentPlayer = 'X';
+            resetBoard();
+            updateGameStatus();
+        }
+
+        // Handle cell click
+        function handleCellClick(index) {
+            // Check if cell is empty and game is active
+            if (gameState.board[index] !== '' || !gameState.gameActive) return;
+            
+            // Make player move
+            makeMove(index, gameState.currentPlayer);
+            
+            // Check for game result
+            checkGameResult();
+            
+            // If playing against bot and it's bot's turn
+            if (gameState.gameMode === 'bot' && 
+                gameState.currentPlayer === gameState.opponentSign && 
+                gameState.gameActive) {
+                
+                // Small delay for better UX
+                setTimeout(botMove, 600);
+            }
+        }
+
+        // Make a move on the board
+        function makeMove(index, player) {
+            gameState.board[index] = player;
+            const cell = document.querySelector(`.cell[data-index="${index}"]`);
+            cell.textContent = player;
+            cell.classList.add(player.toLowerCase());
+            
+            // Switch player
+            gameState.currentPlayer = player === 'X' ? 'O' : 'X';
+            updateGameStatus();
+        }
+
+        // Bot makes a move
+        function botMove() {
+            if (!gameState.gameActive) return;
+            
+            let availableCells = [];
+            
+            // 1. Check if bot can win
+            for (let i = 0; i < 9; i++) {
+                if (gameState.board[i] === '') {
+                    gameState.board[i] = gameState.opponentSign;
+                    if (checkWin()) {
+                        makeMove(i, gameState.opponentSign);
+                        checkGameResult();
+                        return;
+                    }
+                    gameState.board[i] = '';
+                }
+            }
+            
+            // 2. Check if player can win and block them
+            for (let i = 0; i < 9; i++) {
+                if (gameState.board[i] === '') {
+                    gameState.board[i] = gameState.playerSign;
+                    if (checkWin()) {
+                        gameState.board[i] = '';
+                        makeMove(i, gameState.opponentSign);
+                        checkGameResult();
+                        return;
+                    }
+                    gameState.board[i] = '';
+                }
+            }
+            
+            // 3. Try to take center
+            if (gameState.board[4] === '') {
+                makeMove(4, gameState.opponentSign);
+                checkGameResult();
+                return;
+            }
+            
+            // 4. Try to take a corner
+            const corners = [0, 2, 6, 8];
+            const availableCorners = corners.filter(i => gameState.board[i] === '');
+            if (availableCorners.length > 0) {
+                const randomCorner = availableCorners[Math.floor(Math.random() * availableCorners.length)];
+                makeMove(randomCorner, gameState.opponentSign);
+                checkGameResult();
+                return;
+            }
+            
+            // 5. Take any available cell
+            for (let i = 0; i < 9; i++) {
+                if (gameState.board[i] === '') {
+                    availableCells.push(i);
+                }
+            }
+            
+            if (availableCells.length > 0) {
+                const randomIndex = Math.floor(Math.random() * availableCells.length);
+                makeMove(availableCells[randomIndex], gameState.opponentSign);
+                checkGameResult();
+            }
+        }
+
+        // Check for win
+        function checkWin() {
+            for (let pattern of winPatterns) {
+                const [a, b, c] = pattern;
+                if (gameState.board[a] !== '' &&
+                    gameState.board[a] === gameState.board[b] &&
+                    gameState.board[a] === gameState.board[c]) {
+                    
+                    // Highlight winning cells
+                    highlightWinningCells(pattern);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Highlight winning cells
+        function highlightWinningCells(pattern) {
+            pattern.forEach(index => {
+                const cell = document.querySelector(`.cell[data-index="${index}"]`);
+                cell.classList.add('winning');
+            });
+        }
+
+        // Check for tie
+        function checkTie() {
+            return !gameState.board.includes('');
+        }
+
+        // Check game result
+        function checkGameResult() {
+            if (checkWin()) {
+                gameState.gameActive = false;
+                
+                // Determine winner
+                const winner = gameState.currentPlayer === 'X' ? 'O' : 'X';
+                
+                // Update scores
+                if (winner === gameState.playerSign) {
+                    gameState.scores.player++;
+                    showResultPopup('win', `${gameState.playerName} Wins!`);
+                } else {
+                    gameState.scores.opponent++;
+                    const opponentName = gameState.gameMode === 'bot' ? 'Computer' : 'Player 2';
+                    showResultPopup('lose', `${opponentName} Wins!`);
+                }
+                
+                updateScoreDisplay();
+                return;
+            }
+            
+            if (checkTie()) {
+                gameState.gameActive = false;
+                gameState.scores.ties++;
+                showResultPopup('tie', "It's a Tie!");
+                updateScoreDisplay();
+            }
+        }
+
+        // Show result popup
+        function showResultPopup(resultType, message) {
+            const resultIcon = document.getElementById('result-icon');
+            const resultMessage = document.getElementById('result-message');
+            
+            // Set icon and message based on result
+            if (resultType === 'win') {
+                resultIcon.textContent = '🏆';
+                resultIcon.className = 'result-icon win-icon';
+                resultMessage.style.color = '#4CAF50';
+            } else if (resultType === 'lose') {
+                resultIcon.textContent = '😞';
+                resultIcon.className = 'result-icon lose-icon';
+                resultMessage.style.color = '#b21f1f';
+            } else {
+                resultIcon.textContent = '🤝';
+                resultIcon.className = 'result-icon tie-icon';
+                resultMessage.style.color = '#fdbb2d';
+            }
+            
+            resultMessage.textContent = message;
+            showPopup(resultPopup);
+        }
+
+        // Update score display
+        function updateScoreDisplay() {
+            playerScoreElement.textContent = gameState.scores.player;
+            computerScoreElement.textContent = gameState.scores.opponent;
+            tieScoreElement.textContent = gameState.scores.ties;
+        }
+
+        // Update game status
+        function updateGameStatus() {
+            if (!gameState.gameActive) return;
+            
+            let statusText = '';
+            if (gameState.currentPlayer === gameState.playerSign) {
+                statusText = `<div class="player-turn">${gameState.playerName} (${gameState.playerSign})</div><div>'s Turn</div>`;
+            } else {
+                const opponentName = gameState.gameMode === 'bot' ? 'Computer' : 'Player 2';
+                const opponentSign = gameState.currentPlayer;
+                statusText = `<div class="player-turn">${opponentName} (${opponentSign})</div><div>'s Turn</div>`;
+            }
+            
+            gameStatusElement.innerHTML = statusText;
+        }
+
+        // Reset the board
+        function resetBoard() {
+            gameState.board = ['', '', '', '', '', '', '', '', ''];
+            gameState.currentPlayer = 'X';
+            gameState.gameActive = true;
+            
+            // Clear the board
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('x', 'o', 'winning');
+            });
+            
+            updateGameStatus();
+        }
+
+        // Initialize the game when page loads
+        window.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>
